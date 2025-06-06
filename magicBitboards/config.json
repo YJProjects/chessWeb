@@ -1,0 +1,17 @@
+{
+  "boardSize": 64,
+  "directions": {
+    "rook": [[0,1], [0,-1], [1,0], [-1,0]],
+    "bishop": [[1,1], [1,-1], [-1,1], [-1,-1]]
+  },
+  "usage": {
+    "rookAttacks": "occupancy &= rookMasks[square]; occupancy *= rookMagics[square]; occupancy >>>= (64 - popcount(rookMasks[square])); return rookAttackTable[square][occupancy];",
+    "bishopAttacks": "occupancy &= bishopMasks[square]; occupancy *= bishopMagics[square]; occupancy >>>= (64 - popcount(bishopMasks[square])); return bishopAttackTable[square][occupancy];",
+    "queenAttacks": "return rookAttacks | bishopAttacks;"
+  },
+  "files": {
+    "magics.json": "Contains magic numbers and masks for all squares",
+    "attackTables.json": "Contains attack table metadata and samples",
+    "config.json": "This configuration and usage information"
+  }
+}
