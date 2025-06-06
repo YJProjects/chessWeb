@@ -29,6 +29,17 @@ public class Bitboard {
         return Indexes;
     }
 
+    public int countBits() {
+        int count = 0;
+        long bitboard = this.bitboard;
+        while (bitboard != 0) {
+            bitboard &= (bitboard - 1); // Clears the least significant 1 bit
+            count++;
+        }
+
+        return count;
+    }
+
     public void printBoard() {
         for (int rank = 7; rank >= 0; rank--) {
             System.out.print((rank + 1) + "  "); // Print rank number
@@ -46,4 +57,18 @@ public class Bitboard {
         System.out.println("\n   a b c d e f g h"); // Print file letters
     }
 
+    public String getPieceFromBoardWithoutColor(Board board) {
+        if (isSubset(this.bitboard, board.whitePawns.bitboard) || isSubset(this.bitboard, board.blackPawns.bitboard)) {return "Pawn";}
+        if (isSubset(this.bitboard, board.whiteRooks.bitboard) || isSubset(this.bitboard, board.blackRooks.bitboard)) {return "Rook";}
+        if (isSubset(this.bitboard, board.whiteBishops.bitboard) || isSubset(this.bitboard, board.blackBishops.bitboard)) {return "Bishop";}
+        if (isSubset(this.bitboard, board.whiteQueens.bitboard) || isSubset(this.bitboard, board.blackQueens.bitboard)) {return "Queen";}
+        if (isSubset(this.bitboard, board.whiteKnights.bitboard) || isSubset(this.bitboard, board.blackKnights.bitboard)) {return "Knight";}
+        if (isSubset(this.bitboard, board.whiteKing.bitboard) || isSubset(this.bitboard, board.blackKing.bitboard)) {return "King";}
+
+        return null;
+    }
+
+    public static boolean isSubset(long a, long b) { //is A a subset of B
+        return (a & b) == a;
+    }   
 }

@@ -93,7 +93,23 @@ public class Board {
         else if (this.blackKing.containsBit(index)) {return this.blackKing;}
 
         else {return null;}
+    }
 
+    public int getKingIndex(Color color) {
+        Bitboard kingBoard = new Bitboard(0L);
+        if (color == Color.White){
+            kingBoard = this.whiteKing;
+        }
+        else {
+            kingBoard = this.blackKing;
+        }
+        for (int index = 0; index <= 63; index++) {
+            if (kingBoard.containsBit(index)) {
+                return index;
+            }
+        }
+
+        return 0;
     }
 
 
@@ -123,6 +139,5 @@ public class Board {
         //Swap Player Color
         if (this.playerColor == Color.White) {this.playerColor = Color.Black;}
         else if (this.playerColor == Color.Black) {this.playerColor = Color.White;}
-
     }
 }

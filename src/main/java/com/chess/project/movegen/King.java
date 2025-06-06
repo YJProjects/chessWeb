@@ -53,7 +53,7 @@ public class King {
     }
 
     public static Bitboard moves(Board board, Bitboard kingBoard) {
-        long notAFile   = 0xFEFEFEFEFEFEFEFEL; // Clear File A (leftmost column)
+        long notAFile   = 0xFEFEFEFEFEFEFEFEL; 
         long notHFile = 0x7F7F7F7F7F7F7F7FL;
         long notRank_1 = 0xFFFFFFFFFFFFFF00L; 
         long notRank_8 = 0x00FFFFFFFFFFFFFFL;
@@ -80,24 +80,39 @@ public class King {
         Bitboard kingBoardCopy = new Bitboard(friendlyKingBoard.bitboard);
         friendlyKingBoard = new Bitboard(0L);
 
+        Bitboard enemyBishopBoard, enemyRookBoard, enemyQueenBoard, enemyKnightBoard, enemyKingBoard;
+
         if (enemyColor == Color.White) {
             enemyPawnBoard = board.whitePawns;
             friendlyKingBoard = board.blackKing;
             kingBoardCopy = new Bitboard(friendlyKingBoard.bitboard);
             board.blackKing.bitboard = 0L;
+
+            enemyBishopBoard = board.whiteBishops;
+            enemyRookBoard = board.whiteRooks;
+            enemyQueenBoard = board.whiteQueens;
+            enemyKnightBoard = board.whiteKnights;
+            enemyKingBoard = board.whiteKing;
+
         }
         else {
             enemyPawnBoard = board.blackPawns;
             friendlyKingBoard = board.whiteKing;
             kingBoardCopy = new Bitboard(friendlyKingBoard.bitboard);
             board.whiteKing.bitboard = 0L;
-        }
 
-        Bitboard bishopMoves = Bishop.pseudoLegalMoves(board, enemyColor);
-        Bitboard rookMoves = Rook.pseudoLegalMoves(board, enemyColor);
-        Bitboard queenMoves = Queen.pseudoLegalMoves(board, enemyColor);
-        Bitboard knightMoves = Knight.pseudoLegalMoves(board, enemyColor);
-        Bitboard kingMoves = King.pseudoLegalMoves(board, enemyColor);
+            enemyBishopBoard = board.blackBishops;
+            enemyRookBoard = board.blackRooks;
+            enemyQueenBoard = board.blackQueens;
+            enemyKnightBoard = board.blackKnights;
+            enemyKingBoard = board.blackKing;
+        }
+        
+        Bitboard bishopMoves = Bishop.moves(board, enemyBishopBoard);
+        Bitboard rookMoves = Rook.moves(board, enemyRookBoard);
+        Bitboard queenMoves = Queen.moves(board, enemyQueenBoard);
+        Bitboard knightMoves = Knight.moves(board, enemyKnightBoard);
+        Bitboard kingMoves = King.moves(board, enemyKingBoard);
         Bitboard pawnAttacks = Pawn.attacks(board, enemyPawnBoard, enemyColor);
 
         taboo.bitboard = pawnAttacks.bitboard | bishopMoves.bitboard | rookMoves.bitboard | queenMoves.bitboard | knightMoves.bitboard | kingMoves.bitboard;

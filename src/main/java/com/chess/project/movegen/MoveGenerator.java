@@ -33,6 +33,51 @@ public class MoveGenerator {
             moves = King.pseudoLegalMoves(board, index, color);
         }
 
+        Bitboard kingBoard = new Bitboard(0);
+        kingBoard.setBit(board.getKingIndex(color));
+        moves = MoveGenerator.filterPseudoLegalMoves(board, moves, color, board.getKingIndex(color), board.getPieceType(index));
+
+        return moves;
+    }
+
+    public static Bitboard filterPseudoLegalMoves(Board board, Bitboard moves, Color color, int kingIndex, String pieceType) {
+
+        //Check Evasions;
+        Bitboard attackers = new Bitboard(0L);
+        Bitboard kingBoard = new Bitboard(0L);
+        kingBoard.setBit(kingIndex);
+
+        if (color == Color.White) {
+            attackers.bitboard |= Knight.pseudoLegalMoves(board, kingIndex, color).bitboard & board.blackKnights.bitboard;
+            attackers.bitboard |= Rook.pseudoLegalMoves(board, kingIndex, color).bitboard & board.blackRooks.bitboard;
+            attackers.bitboard |= Queen.pseudoLegalMoves(board, kingIndex, color).bitboard & board.blackQueens.bitboard;
+            attackers.bitboard |= Bishop.pseudoLegalMoves(board, kingIndex, color).bitboard & board.blackBishops.bitboard;
+            attackers.bitboard |= Pawn.attacks(board, kingBoard, color).bitboard & board.blackPawns.bitboard;
+        }
+        else {
+            attackers.bitboard |= Knight.pseudoLegalMoves(board, kingIndex, color).bitboard & board.whiteKnights.bitboard;
+            attackers.bitboard |= Rook.pseudoLegalMoves(board, kingIndex, color).bitboard & board.whiteRooks.bitboard;
+            attackers.bitboard |= Queen.pseudoLegalMoves(board, kingIndex, color).bitboard & board.whiteQueens.bitboard;
+            attackers.bitboard |= Bishop.pseudoLegalMoves(board, kingIndex, color).bitboard & board.whiteBishops.bitboard;
+            attackers.bitboard |= Pawn.attacks(board, kingBoard, color).bitboard & board.whitePawns.bitboard;
+        }
+
+        int attackersCount = attackers.countBits();
+        if (pieceType == "King_White" || pieceType == "King_Black") {return moves;}
+        
+        if (attackersCount > 1) {
+            {return new Bitboard(0L);}
+        }
+        if(attackersCount == 1) {
+            if (!BitboardUtils.isSingleSlidingPiece(attackers, board)) {
+                    moves.bitboard &= attackers.bitboard; //If its a non sliding piece we cannot block it so only option is to evade it or move away
+                }
+            else {
+                moves.bitboard &= BitboardUtils.drawLine(kingBoard, attackers).bitboard;
+            }
+            return moves;
+
+        }
         return moves;
     }
 }

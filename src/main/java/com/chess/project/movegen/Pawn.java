@@ -73,12 +73,15 @@ public class Pawn {
         long eastAttacks = 0L;
         long westAttacks = 0L;
 
+        long notAFile   = 0xFEFEFEFEFEFEFEFEL; // Clear File A (leftmost column)
+        long notHFile = 0x7F7F7F7F7F7F7F7FL;
+
         if (color == Color.White) {
-            eastAttacks = (pawnBoard.bitboard << 9);
-            westAttacks = (pawnBoard.bitboard  << 7);
+            eastAttacks = (pawnBoard.bitboard << 9) & notAFile;
+            westAttacks = (pawnBoard.bitboard  << 7) & notHFile;
         } else if (color == Color.Black) {
-            eastAttacks = (pawnBoard.bitboard >> 7);
-            westAttacks = (pawnBoard.bitboard  >> 9);
+            eastAttacks = (pawnBoard.bitboard >> 7) & notAFile;
+            westAttacks = (pawnBoard.bitboard  >> 9) & notHFile ;
         }
         Bitboard allTargets = new Bitboard(eastAttacks | westAttacks);
         return allTargets;
