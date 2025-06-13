@@ -1,5 +1,6 @@
 package com.chess.project;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Bitboard {
     public long bitboard;
@@ -38,6 +39,24 @@ public class Bitboard {
         }
 
         return count;
+    }
+
+    public List<Integer> getSetBitIndexes() {
+        List<Integer> setBitIndexes = new ArrayList<>();
+        long bitboard = this.bitboard;
+        while (bitboard != 0) {
+            // Isolate the least significant bit set to 1
+            long lsb = bitboard & -bitboard;
+
+            // Find the index of that bit (0 to 63)
+            int index = Long.numberOfTrailingZeros(lsb);
+            setBitIndexes.add(index);
+
+            // Clear that bit from the bitboard
+            bitboard &= (bitboard - 1);
+        }
+
+        return setBitIndexes;
     }
 
     public void printBoard() {

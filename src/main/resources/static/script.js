@@ -3,6 +3,9 @@ let currentBoard = null
 //const currentURL = "https://chessweb-98le.onrender.com/"
 const currentURL = "http://localhost:8080/"
 
+let playerColor = "White";
+let moveGenerationTime = 0;
+
 function createBoard() {
 
     const columnName = {
@@ -52,12 +55,23 @@ function resetBoard() {
             const child = square.children[0]
             square.removeChild(child)
         }
+
+        
     }
+}
+
+function updateDebugData() {
+    const moveGenerationTimeSpan = document.getElementById("moveGenerationTime")
+    moveGenerationTimeSpan.textContent =  moveGenerationTime + "ms"
+    
+    const playerColorSpan = document.getElementById("playerColor")
+    playerColorSpan.textContent = playerColor
 }
 
 function setBoard(board) {
     currentBoard = board
     resetBoard()
+    removeAllEventListenersFromBoard()
     for (let index = 0; index <= 63; index ++){
         const piece = board[index]
 
@@ -73,6 +87,47 @@ function setBoard(board) {
             square.appendChild(img);
         }
     }
+
+    addEventListernsToAllSquares();
+    
+}
+
+function addDragStartEventListener(square) {
+    square.addEventListener('dragstart', (event) => {
+        pieceSelected(square); //On hovering on element the piece is marked as selected
+    })
+}
+
+function addDragOverEventListener(square) {
+    square.addEventListener('dragover', (event) => {
+        event.preventDefault();
+    })
+}
+
+function addDropEventListener(square) {
+    square.addEventListener('drop', (event) => {
+        dropPiece(square);
+    })
+}
+
+function addEventListernsToAllSquares() {
+    for (let index = 0; index <= 63; index++) {
+        const square = document.querySelector(`[index="${index}"]`)
+        if (square.children.length > 0) {
+            addDragStartEventListener(square);
+        }
+        addDragOverEventListener(square);
+        addDropEventListener(square);
+    }
+}
+
+function removeAllEventListenersFromBoard() {
+    for (let index = 0; index <= 63; index++) {
+        const square = document.querySelector(`[index="${index}"]`)
+        const clone = square.cloneNode(true);
+        square.parentNode.replaceChild(clone, square);
+    }
+    
 }
 
 function initGame() {
@@ -100,23 +155,6 @@ function initGame() {
 
 initGame()
 
-//Add event listener to every square.
-for (let index = 0; index <= 63; index++) {
-    const square = document.querySelector(`[index="${index}"]`)
-    square.addEventListener('dragover', (event) => {
-        event.preventDefault();
-    })
-    square.addEventListener('drop', (event) => {
-        dropPiece(square);
-    })
-
-    console.log(square.children.img, square.children[0])
-
-    square.addEventListener('dragstart', (event) => {
-    pieceSelected(square);
-    })
-
-}
 
 async function pieceSelected(square) {
     const start = performance.now();
@@ -131,11 +169,15 @@ async function pieceSelected(square) {
         .then((response) => response.json())
         .then((data) => {
             const end = performance.now(); 
-            console.log(`API call time generate moves: ${end - start} milliseconds`);
             console.log("legal moves", data);
 
             
             if(data['moves']) {data['moves'].forEach((index) => highlightSquare(index))}
+
+            moveGenerationTime = data['DebugData']['moveGenerationTime']
+            playerColor = data['DebugData']['playerColor']
+
+            updateDebugData();
             
         })
         .catch((error) => console.error("Error:", error));
@@ -143,28 +185,22 @@ async function pieceSelected(square) {
     prevSquare = square
 }
 
-function playAudio(square) {
+function playAudio(pieceCaptured) {
     let captureAudio = new Audio('../static/Sounds/capture.mp3')
     let moveSelfAudio = new Audio('../static/Sounds/move-self.mp3')
     
-    if (square.children.length > 0) {
+    if (pieceCaptured) {
         captureAudio.play()
     }
     else {
         moveSelfAudio.play()
-        console.log("AUDIO PLAYED")
     }
 }
 
 async function dropPiece(square) {
-    isSquareHighlighted = square.getAttribute('highlighted') == "True"? true : false
+    let isSquareHighlighted = square.getAttribute('highlighted') == "True"? true : false
 
-    //Sounds 
-    if (isSquareHighlighted) {
-        playAudio(square)
-    }
-
-    console.log("REQ MOVE")
+    if (!prevSquare) {playAudio(false);}
 
     if(prevSquare && isSquareHighlighted){
         let start = performance.now();
@@ -184,7 +220,11 @@ async function dropPiece(square) {
             console.log(data)
 
             setBoard(data['Board']);
+
+            const isPieceCaptured = data['pieceCaptured']
             let checkMateDiv = document.getElementById("checkmate")
+
+            playAudio(isPieceCaptured);
             //if (data['isCheckMate']) {checkMateDiv.textContent = "CHECKMATE, YOU WIN"}
         })
         .catch((error) => console.error("Error:", error));

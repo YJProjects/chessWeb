@@ -24,10 +24,30 @@ public class Pawn {
 
         Bitboard pushes = Pawn.pushes(board, pawnBoard, color);
         Bitboard attacks = Pawn.attacks(board, pawnBoard, color);
+        Bitboard legalAttacks = new Bitboard(attacks.bitboard & enemyPieces.bitboard);
 
-        attacks.bitboard &= enemyPieces.bitboard;
-        return new Bitboard(pushes.bitboard | attacks.bitboard);
+        //Add enPassant
+        //Rules : If EnPassant is possible pawn attack square contains enPassantSquare we conclude enPassant is a legalMove
+        //We also filter the row for which enpassant is possible. 
+        
+        Bitboard enPassantBoard = new Bitboard(0L);
+        long notRank_3 = ~0x0000000000FF0000L;
+        long notRank_6 = ~0x0000FF0000000000L;
 
+        if (board.enPassantIndex != null) {
+            enPassantBoard.setBit(board.enPassantIndex);
+
+            //Filter Rows
+            if (color == Color.White) {enPassantBoard.bitboard &= notRank_3;}
+            else if (color == Color.Black) {enPassantBoard.bitboard &= notRank_6;}
+
+            //Check if attack coincides with correct color
+            if ((enPassantBoard.bitboard & attacks.bitboard) > 0){
+                legalAttacks.bitboard |= enPassantBoard.bitboard;
+            }
+        }
+        
+        return new Bitboard(pushes.bitboard | legalAttacks.bitboard);
     }
 
     /*
@@ -48,9 +68,19 @@ public class Pawn {
 
         Bitboard pushes = Pawn.pushes(board, pawnBoard, color);
         Bitboard attacks = Pawn.attacks(board, pawnBoard, color);
+        Bitboard legalAttacks = new Bitboard(attacks.bitboard & enemyPieces.bitboard);
 
-        attacks.bitboard &= enemyPieces.bitboard;
-        return new Bitboard(pushes.bitboard | attacks.bitboard);
+        //Add enPassant
+        //Rules : If EnPassant is possible pawn attack square contains enPassantSquare we conclude enPassant is a legalMove
+        
+        Bitboard enPassantBoard = new Bitboard(0L);
+        if (board.enPassantIndex != null) {
+            enPassantBoard.setBit(board.enPassantIndex);
+            if ((enPassantBoard.bitboard & legalAttacks.bitboard) > 0){
+                legalAttacks.bitboard |= enPassantBoard.bitboard;
+            }
+        }
+        return new Bitboard(pushes.bitboard | legalAttacks.bitboard);
     }
 
     public static Bitboard pushes(Board board, Bitboard pawnBoard, Color color) {
@@ -84,6 +114,7 @@ public class Pawn {
             westAttacks = (pawnBoard.bitboard  >> 9) & notHFile ;
         }
         Bitboard allTargets = new Bitboard(eastAttacks | westAttacks);
+
         return allTargets;
     }
 }

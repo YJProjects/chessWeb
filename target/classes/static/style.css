@@ -11,8 +11,25 @@ body {
     border-radius: 5px;
     border: 1px solid black;
     overflow: hidden;
-    display: inline-block;
-    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    justify-self: flex-end;
+    flex: 0 0 auto;
+    margin-left: 150px;
+    
+}
+
+#DebugData {
+    width: 25vw;
+    min-width: 200px;
+    justify-items: flex-start;
+    margin-left: 50px
+}
+
+.topBlock{
+    display : flex;
+    width: 100vw;
+    justify-content: center;
 }
 
 div[index] {
@@ -40,4 +57,8 @@ div[color][highlighted = True]{
     height: 90px;
     width: 90px;
     margin-left: 1px;
+}
+
+#FEN, #submitFEN, #resetFEN, #pieceStyleDropDown{
+    margin-right: 20vw;
 }

@@ -7,9 +7,15 @@
     <title>Document</title>
 </head>
 <body>
+    <div class = "topBlock">
+        <div id = "chessboard"></div>
+        <div id = "DebugData">
+            moveGenerationTime: <span id = "moveGenerationTime"></span>
 
-    <div id = "chessboard"></div>
-
+            <br><br>
+            Player Color: <span id = "playerColor"></span>
+        </div>
+    </div>
 
     <select id="pieceStyleDropDown">
         <option value="classic">classic</option>
@@ -20,7 +26,6 @@
 
     <input type="text" id="FEN" placeholder="Enter FEN here">
     <button id="submitFEN">Submit FEN</button>  
-
     <button id="resetFEN">Reset FEN</button>
 
     <div id = "checkmate"></div>

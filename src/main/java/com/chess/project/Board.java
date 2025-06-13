@@ -19,6 +19,9 @@ public class Board {
 
     public Color playerColor;
 
+    public Integer enPassantIndex;
+    public Boolean pieceCaptured;
+
     public Board() {
         // Initialize standard chess position or custom as needed
         this.whitePawns = new Bitboard(0x000000000000FF00L);
@@ -128,12 +131,48 @@ public class Board {
     public void makeMove(int from, int to) {
         Bitboard startSquareBitboard = this.getBoardType(from);
         Bitboard endSquareBitboard = this.getBoardType(to);
+        String pieceType = this.getPieceType(from);
+
+        pieceCaptured = false; //For Audio Purposes
 
         startSquareBitboard.flipBit(from);
         startSquareBitboard.flipBit(to);
 
         if (endSquareBitboard != null) {
+            pieceCaptured = true;
             endSquareBitboard.flipBit(to);
+        }
+
+        //If move was enpassant we have to delete the enemy Pawn which will be 8 squares behind if white pawn is capturing and 8 squares ahead if black is capturing
+        if  ((this.enPassantIndex != null) && (to == this.enPassantIndex) && (pieceType == "Pawn_White" || pieceType == "Pawn_Black")) {
+            int row = Math.floorDiv(to, 8) + 1;
+            if (row == 6) {
+                pieceCaptured = true;
+                this.blackPawns.flipBit(to - 8);
+            }
+            if (row == 3) {
+                pieceCaptured = true;
+                this.whitePawns.flipBit(to + 8);
+            }
+        }
+
+        //Reset en passant index every turn since it lasts for a single chance.
+        this.enPassantIndex = null;
+
+        //check if en passant is enable
+        // if piece type is a pawn and distance |(from - to)| is 16 (2 rows pushed) : en passant MIGHT be possible
+        // if pawn color is white and has moves to 4th rank, en passant is enabled 8 squares behind it
+        // if pawn color is black and has moves to 5th rnk, en passnt is enables 8 squares infront of it.
+
+        long distance = Math.abs(from - to);
+        if ((pieceType == "Pawn_White" || pieceType == "Pawn_Black") & (distance == 16)) {
+            int row = Math.floorDiv(to, 8) + 1;
+            if (pieceType == "Pawn_White" && row == 4) {
+                this.enPassantIndex = to - 8;
+            }
+            if (pieceType == "Pawn_Black" && row == 5) {
+                this.enPassantIndex = to + 8;
+            }
         }
 
         //Swap Player Color
