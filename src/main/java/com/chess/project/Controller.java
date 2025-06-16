@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import com.chess.project.movegen.MoveGenerator;
+import com.chess.project.movegen.perftTests;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
@@ -21,6 +23,8 @@ public class Controller {
     public String[] init(){
         boardService.init();
         Board board = boardService.getBoard();
+        perftTests.perftTestOne(board, 0);
+
         return board.pieceArray();
     }
 

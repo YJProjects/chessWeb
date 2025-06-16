@@ -25,6 +25,23 @@ public class King {
         Bitboard moves = King.moves(board, kingBoard);
         moves.bitboard &= (empty.bitboard | enemyPieces.bitboard);
 
+        if (color == Color.White) {
+            if (board.canWhiteKingSideCastle && empty.containsBit(5) && empty.containsBit(6)) {
+                moves.setBit(6);
+            }
+            if (board.canWhiteQueenSideCastle && empty.containsBit(1) && empty.containsBit(2) && empty.containsBit(3)) {
+                moves.setBit(2);
+            }
+        }
+        if (color == Color.Black) {
+            if (board.canBlackKingSideCastle && empty.containsBit(61) && empty.containsBit(62)) {
+                moves.setBit(62);
+            }
+            if (board.canBlackQueenSideCastle && empty.containsBit(57) && empty.containsBit(58) && empty.containsBit(59)) {
+                moves.setBit(58);
+            }
+        }
+
         Bitboard taboo = King.tabooSquares(board, kingBoard, enemyColor);
 
         moves.bitboard &= ~(taboo.bitboard);
@@ -47,6 +64,8 @@ public class King {
 
         Bitboard moves = King.moves(board, kingBoard);
         moves.bitboard &= (empty.bitboard | enemyPieces.bitboard);
+
+        
 
         return moves;
         
@@ -107,6 +126,8 @@ public class King {
             enemyKnightBoard = board.blackKnights;
             enemyKingBoard = board.blackKing;
         }
+
+        
         
         Bitboard bishopMoves = Bishop.moves(board, enemyBishopBoard);
         Bitboard rookMoves = Rook.moves(board, enemyRookBoard);

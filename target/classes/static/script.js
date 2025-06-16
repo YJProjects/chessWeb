@@ -3,7 +3,6 @@ let currentBoard = null
 //const currentURL = "https://chessweb-98le.onrender.com/"
 const currentURL = "http://localhost:8080/"
 
-let playerColor = "White";
 let moveGenerationTime = 0;
 
 function createBoard() {
@@ -64,14 +63,11 @@ function updateDebugData() {
     const moveGenerationTimeSpan = document.getElementById("moveGenerationTime")
     moveGenerationTimeSpan.textContent =  moveGenerationTime + "ms"
     
-    const playerColorSpan = document.getElementById("playerColor")
-    playerColorSpan.textContent = playerColor
 }
 
 function setBoard(board) {
     currentBoard = board
     resetBoard()
-    removeAllEventListenersFromBoard()
     for (let index = 0; index <= 63; index ++){
         const piece = board[index]
 
@@ -82,43 +78,79 @@ function setBoard(board) {
             const square = document.querySelector(`[index="${index}"]`);
             const img = document.createElement('img');
             img.src = `../static/pieceImages/${pieceStylePath}/${piece}.png`;
-            img.draggable = true
-            img.classList.add("pieceImage");
+            img.height = 90;
+            img.draggable = true;
+            img.style.zIndex = 100;
             square.appendChild(img);
+
+            img.addEventListener('mousedown', (e) => mouseDown(e, img))
         }
+    }    
+}
+
+let moveListener; let upListener; let originalX;let originalY;
+function mouseDown(e, img) {
+    img.style.position = "fixed";
+    startX = e.clientX;
+    startY = e.clientY;
+
+    let originalPos = img.getBoundingClientRect()
+    originalX = originalPos.x;
+    originalY = originalPos.y;
+
+    const square = img.parentNode;
+
+    // Move the image to follow the mouse immediately
+    const offset = img.height / 2;
+    img.style.left = (startX - offset) + 'px';
+    img.style.top = (startY - offset) + 'px';
+    img.style.pointerEvents = "none"; // Prevent blocking the square underneath
+
+    moveListener = (e) => mouseMove(e, img);
+    upListener = (e) => mouseUp(e, img);
+
+    pieceSelected(square)
+
+    document.addEventListener('mousemove', moveListener);
+    document.addEventListener('mouseup', upListener);
+}
+
+
+function mouseUp(e, img) {
+
+
+    document.removeEventListener('mousemove', moveListener);
+    document.removeEventListener('mouseup', upListener);
+
+
+    let square = document.elementFromPoint(e.clientX, e.clientY);
+    if (square.nodeName == "IMG") {square = square.parentNode;}
+
+    let isSquareHighlighted = square.getAttribute('highlighted') == "True"? true : false
+    console.log(square, square.nodeName)
+
+    if (!isSquareHighlighted ) {
+        img.style.removeProperty('top')
+        img.style.removeProperty('left')
+        img.style.removeProperty('position');
+        img.style.removeProperty('pointer-events');
     }
 
-    addEventListernsToAllSquares();
+    
+    dropPiece(square)
     
 }
 
-function addDragStartEventListener(square) {
-    square.addEventListener('dragstart', (event) => {
-        pieceSelected(square); //On hovering on element the piece is marked as selected
-    })
-}
+function mouseMove(e, img) {
+    newX = startX - e.clientX;
+    newY = startY - e.clientY;
+    offset = img.height / 2 //Grabbing an image the left left corner of the img is position at our mouse. to align the centre piece we offset it
 
-function addDragOverEventListener(square) {
-    square.addEventListener('dragover', (event) => {
-        event.preventDefault();
-    })
-}
+    startX = e.clientX;
+    startY = e.clientY;
 
-function addDropEventListener(square) {
-    square.addEventListener('drop', (event) => {
-        dropPiece(square);
-    })
-}
-
-function addEventListernsToAllSquares() {
-    for (let index = 0; index <= 63; index++) {
-        const square = document.querySelector(`[index="${index}"]`)
-        if (square.children.length > 0) {
-            addDragStartEventListener(square);
-        }
-        addDragOverEventListener(square);
-        addDropEventListener(square);
-    }
+    img.style.left = (startX - offset) + 'px'
+    img.style.top = (startY - offset) + 'px'
 }
 
 function removeAllEventListenersFromBoard() {
@@ -127,7 +159,6 @@ function removeAllEventListenersFromBoard() {
         const clone = square.cloneNode(true);
         square.parentNode.replaceChild(clone, square);
     }
-    
 }
 
 function initGame() {
@@ -175,7 +206,6 @@ async function pieceSelected(square) {
             if(data['moves']) {data['moves'].forEach((index) => highlightSquare(index))}
 
             moveGenerationTime = data['DebugData']['moveGenerationTime']
-            playerColor = data['DebugData']['playerColor']
 
             updateDebugData();
             

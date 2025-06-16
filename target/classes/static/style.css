@@ -35,6 +35,7 @@ body {
 div[index] {
     height: 90px;
     width: 90px;
+    position: relative;
 }
 
 div[row] {
@@ -53,12 +54,7 @@ div[color][highlighted = True]{
     background-color: rgba(168, 250, 16, 0.779);
 }
 
-.pieceImage{
-    height: 90px;
-    width: 90px;
-    margin-left: 1px;
-}
 
-#FEN, #submitFEN, #resetFEN, #pieceStyleDropDown{
+#FEN, #submitFEN, #resetFEN, #pieceStyleopDown{
     margin-right: 20vw;
 }

@@ -15,7 +15,7 @@ public class MoveGenerator {
         Color color = Color.White;
         if (blackPieces.containsBit(index)) {color = Color.Black;}
 
-        //if (color != board.playerColor) {return moves;}
+        if (color != board.playerColor) {return moves;}
 
         if (board.whitePawns.containsBit(index) || board.blackPawns.containsBit(index)) {
             moves = Pawn.pseudoLegalMoves(board, index, color);
@@ -159,5 +159,91 @@ public class MoveGenerator {
         }
         
         return moves;   
+    }
+    
+    public static List<int[]> createMoveList(Board board, Color color) { // A nested list containing list from at index 0 and to and index 1
+        List<Integer> PawnIndexes;
+        List<Integer> KnightIndexes;
+        List<Integer> QueenIndexes;
+        List<Integer> KingIndex;
+        List<Integer> RookIndexes;
+        List<Integer> BishopIndexes;
+
+        if (color == Color.White) {
+            PawnIndexes = board.whitePawns.getSetBitIndexes();
+            RookIndexes = board.whiteRooks.getSetBitIndexes();
+            BishopIndexes = board.whiteBishops.getSetBitIndexes();
+            KnightIndexes = board.whiteKnights.getSetBitIndexes();
+            QueenIndexes = board.whiteQueens.getSetBitIndexes();
+            KingIndex = board.whiteKing.getSetBitIndexes();
+        }
+        else {
+            PawnIndexes = board.blackPawns.getSetBitIndexes();
+            RookIndexes = board.blackRooks.getSetBitIndexes();
+            BishopIndexes = board.blackBishops.getSetBitIndexes();
+            KnightIndexes = board.blackKnights.getSetBitIndexes();
+            QueenIndexes = board.blackQueens.getSetBitIndexes();
+            KingIndex = board.blackKing.getSetBitIndexes();
+        }
+
+        List<int[]> moveList = new ArrayList<>();
+
+        
+        for (int index : PawnIndexes) {
+            int from = index;
+            Bitboard moves = Pawn.pseudoLegalMoves(board, index, color);
+            List<Integer> pieceMoveList = moves.getSetBitIndexes();
+            for (int move: pieceMoveList) {
+                int[] moveCombination = {from, move};
+                moveList.add(moveCombination);
+            }
+        }
+        for (int index : RookIndexes) {
+            int from = index;
+            Bitboard moves = Rook.pseudoLegalMoves(board, index, color);
+            List<Integer> pieceMoveList = moves.getSetBitIndexes();
+            for (int move: pieceMoveList) {
+                int[] moveCombination = {from, move};
+                moveList.add(moveCombination);
+            }
+        }
+        for (int index : KnightIndexes) {
+            int from = index;
+            Bitboard moves = Knight.pseudoLegalMoves(board, index, color);
+            List<Integer> pieceMoveList = moves.getSetBitIndexes();
+            for (int move: pieceMoveList) {
+                int[] moveCombination = {from, move};
+                moveList.add(moveCombination);
+            }
+        }
+        for (int index : BishopIndexes) {
+            int from = index;
+            Bitboard moves = Bishop.pseudoLegalMoves(board, index, color);
+            List<Integer> pieceMoveList = moves.getSetBitIndexes();
+            for (int move: pieceMoveList) {
+                int[] moveCombination = {from, move};
+                moveList.add(moveCombination);
+            }
+        }
+        for (int index : QueenIndexes) {
+            int from = index;
+            Bitboard moves = Queen.pseudoLegalMoves(board, index, color);
+            List<Integer> pieceMoveList = moves.getSetBitIndexes();
+            for (int move: pieceMoveList) {
+                int[] moveCombination = {from, move};
+                moveList.add(moveCombination);
+            }
+        }
+        for (int index : KingIndex) {
+            int from = index;
+            Bitboard moves = King.pseudoLegalMoves(board, index, color);
+            List<Integer> pieceMoveList = moves.getSetBitIndexes();
+            for (int move: pieceMoveList) {
+                int[] moveCombination = {from, move};
+                moveList.add(moveCombination);
+            }
+        }
+
+        return moveList;
     }
 }

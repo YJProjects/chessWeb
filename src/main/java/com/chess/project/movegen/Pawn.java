@@ -86,14 +86,16 @@ public class Pawn {
     public static Bitboard pushes(Board board, Bitboard pawnBoard, Color color) {
         long singlePushes = 0L;
         long doublePushes = 0L;
+        long Rank_4 = 0x00000000FF000000L;
+        long Rank_5 = 0x000000FF00000000L;
         long empty = board.getEmpty().bitboard;
 
         if (color == Color.White) {
             singlePushes = (pawnBoard.bitboard << 8) & empty;
-            doublePushes = (singlePushes << 8) & empty;
+            doublePushes = (singlePushes << 8) & empty & Rank_4;
         } else if (color == Color.Black) {
             singlePushes = (pawnBoard.bitboard >> 8) & empty;
-            doublePushes = (singlePushes >> 8) & empty;
+            doublePushes = (singlePushes >> 8) & empty & Rank_5;
         }
         Bitboard allTargets = new Bitboard(singlePushes | doublePushes);
         return allTargets;

@@ -22,6 +22,11 @@ public class Board {
     public Integer enPassantIndex;
     public Boolean pieceCaptured;
 
+    public Boolean canWhiteKingSideCastle = true;
+    public Boolean canBlackKingSideCastle = true;
+    public Boolean canWhiteQueenSideCastle = true;
+    public Boolean canBlackQueenSideCastle = true;
+
     public Board() {
         // Initialize standard chess position or custom as needed
         this.whitePawns = new Bitboard(0x000000000000FF00L);
@@ -60,6 +65,7 @@ public class Board {
 
         return board;
     }
+
 
     public String getPieceType(int index) {
         if (this.whitePawns.containsBit(index)) {return "Pawn_White";}
@@ -143,6 +149,19 @@ public class Board {
             endSquareBitboard.flipBit(to);
         }
 
+        //Promote Piece if its a pawn on opposite end of the board
+        //Rules:
+        //-> Piece should be Pawn_White and endPos(to) should be between 56 and 63 i.e. to > 56
+        //-> Piece should be Pawn_Black and endPos(to) should be between 0 and 7
+        if (pieceType == "Pawn_White" && (to >= 56)) {
+            this.whitePawns.flipBit(to);
+            this.whiteQueens.flipBit(to);
+        }
+        if (pieceType == "Pawn_Black" && (to <= 7)) {
+            this.blackPawns.flipBit(to);
+            this.blackQueens.flipBit(to);
+        }
+
         //If move was enpassant we have to delete the enemy Pawn which will be 8 squares behind if white pawn is capturing and 8 squares ahead if black is capturing
         if  ((this.enPassantIndex != null) && (to == this.enPassantIndex) && (pieceType == "Pawn_White" || pieceType == "Pawn_Black")) {
             int row = Math.floorDiv(to, 8) + 1;
@@ -173,6 +192,50 @@ public class Board {
             if (pieceType == "Pawn_Black" && row == 5) {
                 this.enPassantIndex = to + 8;
             }
+        }
+
+        //Check if move was a castle. If it is we have to move the rook accordingly.
+        if (pieceType == "King_White") {
+            if (from == 4 & to == 6) {
+                this.whiteRooks.setBit(5);
+                this.whiteRooks.flipBit(7);
+            }
+            if (from == 4 & to == 2) {
+                this.whiteRooks.setBit(3);
+                this.whiteRooks.flipBit(0);
+            }
+        }
+        else if (pieceType == "King_Black") {
+            if (from == 60 & to == 58) {
+                this.blackRooks.setBit(59);
+                this.blackRooks.flipBit(56);
+            }
+            if (from == 60 & to == 62) {
+                this.blackRooks.setBit(61);
+                this.blackRooks.flipBit(63);
+            }
+        }
+
+        //check if king can castle
+        if (pieceType == "King_White") {
+            this.canWhiteKingSideCastle = false;
+            this.canWhiteQueenSideCastle = false;
+        }
+        else if (from == 7 || to == 7) {
+            this.canWhiteKingSideCastle = false; //if from == 7 than kingside rook has moved and to == 7 means kingside rook has been captured
+        }
+        else if (from == 0 || to == 0) {
+            this.canWhiteQueenSideCastle = false; //if from == 0 than queenside rook has moved and to == 0 means queenside rook has been captured
+        }
+        else if (pieceType == "King_Black") {
+            this.canBlackKingSideCastle = false;
+            this.canBlackQueenSideCastle = false;
+        }
+        else if (from == 56 || to == 56) {
+            this.canBlackQueenSideCastle = false; //if from == 56 than queenside rook has moved and to == 56 means queenside rook has been captured
+        }
+        else if (from == 63 || to == 63) {
+            this.canBlackKingSideCastle = false; //if from == 63 than queenside rook has moved and to == 63 means queenside rook has been captured
         }
 
         //Swap Player Color
